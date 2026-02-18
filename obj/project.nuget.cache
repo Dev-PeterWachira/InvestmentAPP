@@ -1,0 +1,12 @@
+{
+  "version": 2,
+  "dgSpecHash": "bwFFDDWplbY=",
+  "success": true,
+  "projectFilePath": "C:\\Users\\PeterMainaWachira\\Investment.API\\Investment.API.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\PeterMainaWachira\\.nuget\\packages\\bcrypt.net-next\\4.1.0\\bcrypt.net-next.4.1.0.nupkg.sha512",
+    "C:\\Users\\PeterMainaWachira\\.nuget\\packages\\microsoft.aspnetcore.openapi\\9.0.13\\microsoft.aspnetcore.openapi.9.0.13.nupkg.sha512",
+    "C:\\Users\\PeterMainaWachira\\.nuget\\packages\\microsoft.openapi\\1.6.17\\microsoft.openapi.1.6.17.nupkg.sha512"
+  ],
+  "logs": []
+}
