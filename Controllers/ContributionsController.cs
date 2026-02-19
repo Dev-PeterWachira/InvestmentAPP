@@ -95,5 +95,41 @@ namespace Investment.API.Controllers
 
             return Ok(new { total });
         }
+
+        // GET: api/contributions/share
+[HttpGet("share")]
+public async Task<IActionResult> GetMyShare()
+{
+    // Get logged-in user ID from JWT
+    var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+    if (userId == null)
+        return Unauthorized();
+
+    var userGuid = Guid.Parse(userId);
+
+    // Total contributions by this user
+    var userTotal = await _context.Contributions
+        .Where(c => c.UserId == userGuid)
+        .SumAsync(c => c.Amount);
+
+    // Total contributions by ALL users
+    var groupTotal = await _context.Contributions
+        .SumAsync(c => c.Amount);
+
+    // Avoid division by zero
+    decimal sharePercentage = 0;
+    if (groupTotal > 0)
+    {
+        sharePercentage = (userTotal / groupTotal) * 100;
+    }
+
+    return Ok(new
+    {
+        yourTotal = userTotal,
+        groupTotal = groupTotal,
+        sharePercentage = Math.Round(sharePercentage, 2)
+    });
+}
+
     }
 }

@@ -16,6 +16,8 @@ namespace Investment.API.Models
 
         public bool IsPaid { get; set; } = false;
 
+        public DateTime DateIssued { get; set; } = DateTime.UtcNow;
+
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }
 }
