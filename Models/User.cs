@@ -7,7 +7,7 @@ namespace Investment.API.Models
 {
     public class User
     {
-        public int Id {get; set;}
+        public Guid Id {get; set;}
 
         [Required]
 
@@ -15,7 +15,7 @@ namespace Investment.API.Models
         [Required]
         public string FullName{get; set;} = string.Empty;
         [Required]
-        public string phoneNumber{get;set;} = string.Empty;
+        public string PhoneNumber{get;set;} = string.Empty;
 
         public string PasswordHash {get; set;} = string.Empty;
 
