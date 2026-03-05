@@ -2,7 +2,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 
-public class DarajaService
+public class DarajaService : IDarajaService
 {
     private readonly IConfiguration _config;
     private readonly HttpClient _http;
@@ -29,18 +29,18 @@ public class DarajaService
             "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials"
         );
 
-     var content = await response.Content.ReadAsStringAsync();
-using var json = JsonDocument.Parse(content);
+        var content = await response.Content.ReadAsStringAsync();
 
-var token = json.RootElement
-                .GetProperty("access_token")
-                .GetString();
+        using var json = JsonDocument.Parse(content);
 
-if (string.IsNullOrEmpty(token))
-    throw new Exception("Daraja access token is null or empty");
+        var token = json.RootElement
+                        .GetProperty("access_token")
+                        .GetString();
 
-return token;
+        if (string.IsNullOrEmpty(token))
+            throw new Exception("Daraja access token is null or empty");
 
+        return token;
     }
 
     public async Task<string> InitiateStkPush(string phone, decimal amount)
