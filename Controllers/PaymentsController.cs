@@ -1,5 +1,3 @@
-using Investment.API.Data;
-using Investment.API.Models;
 using Investment.API.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
@@ -10,13 +8,11 @@ namespace Investment.API.Controllers
     [Route("api/[controller]")]
     public class PaymentsController : ControllerBase
     {
-        private readonly IDarajaService _darajaService;
-        private readonly ApplicationDbContext _context;
+        private readonly IPaymentService _paymentService;
 
-        public PaymentsController(IDarajaService darajaService, ApplicationDbContext context)
+        public PaymentsController(IPaymentService paymentService)
         {
-            _darajaService = darajaService;
-            _context = context;
+            _paymentService = paymentService;
         }
 
         // ===============================
@@ -27,7 +23,7 @@ namespace Investment.API.Controllers
         {
             try
             {
-                var response = await _darajaService.InitiateStkPush(phoneNumber, amount);
+                var response = await _paymentService.InitiateStkPush(phoneNumber, amount);
 
                 return Ok(new
                 {
@@ -53,58 +49,12 @@ namespace Investment.API.Controllers
         {
             try
             {
-                var stkCallback = body
-                    .GetProperty("Body")
-                    .GetProperty("stkCallback");
-
-                var resultCode = stkCallback.GetProperty("ResultCode").GetInt32();
-
-                if (resultCode != 0)
-                {
-                    return Ok(new
-                    {
-                        message = "Payment failed"
-                    });
-                }
-
-                var metadata = stkCallback
-                    .GetProperty("CallbackMetadata")
-                    .GetProperty("Item");
-
-                decimal amount = 0;
-                string phone = "";
-                string receipt = "";
-
-                foreach (var item in metadata.EnumerateArray())
-                {
-                    var name = item.GetProperty("Name").GetString();
-
-                    if (name == "Amount")
-                        amount = item.GetProperty("Value").GetDecimal();
-
-                    if (name == "PhoneNumber")
-                        phone = item.GetProperty("Value").GetInt64().ToString();
-
-                    if (name == "MpesaReceiptNumber")
-                        receipt = item.GetProperty("Value").GetString() ?? "";
-                }
-
-                var payment = new Payment
-                {
-                    Id = Guid.NewGuid(),
-                    PhoneNumber = phone,
-                    Amount = amount,
-                    MpesaReceiptNumber = receipt,
-                    CreatedAt = DateTime.UtcNow
-                };
-
-                _context.Payments.Add(payment);
-
-                await _context.SaveChangesAsync();
+                var payment = await _paymentService.ProcessMpesaCallback(body);
 
                 return Ok(new
                 {
-                    message = "Payment recorded successfully"
+                    message = "Payment recorded successfully",
+                    payment
                 });
             }
             catch (Exception ex)
