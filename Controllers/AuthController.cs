@@ -1,14 +1,6 @@
-using Investment.API.Data;
 using Investment.API.DTOs;
-using Investment.API.Models;
+using Investment.API.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
-using Investment.API.Dtos;
-
 
 namespace Investment.API.Controllers
 {
@@ -16,88 +8,33 @@ namespace Investment.API.Controllers
     [Route("api/[controller]")]
     public class AuthController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
-        private readonly IConfiguration _configuration;
+        private readonly IAuthService _authService;
 
-        public AuthController(ApplicationDbContext context, IConfiguration configuration)
+        public AuthController(IAuthService authService)
         {
-            _context = context;
-            _configuration = configuration;
+            _authService = authService;
         }
 
-        // Register
         [HttpPost("register")]
         public async Task<IActionResult> Register(RegisterDto dto)
         {
-            var userExists = await _context.Users
-                .AnyAsync(u => u.Email == dto.Email);
+            var token = await _authService.RegisterAsync(dto);
 
-            if (userExists)
+            if (token == null)
                 return BadRequest("User already exists");
 
-            var user = new User
-            {
-                Id = Guid.NewGuid(),
-                FullName = dto.FullName,
-                Email = dto.Email,
-                PhoneNumber = dto.PhoneNumber,
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password)
-            };
-
-            _context.Users.Add(user);
-            await _context.SaveChangesAsync();
-
-            return Ok("User registered successfully");
+            return Ok(new { token });
         }
 
-        // Login
         [HttpPost("login")]
         public async Task<IActionResult> Login(LoginDto dto)
         {
-            var user = await _context.Users
-                .FirstOrDefaultAsync(u => u.Email == dto.Email);
+            var token = await _authService.LoginAsync(dto);
 
-            if (user == null)
+            if (token == null)
                 return Unauthorized("Invalid credentials");
 
-            var isValid = BCrypt.Net.BCrypt.Verify(dto.Password, user.PasswordHash);
-
-            if (!isValid)
-                return Unauthorized("Invalid credentials");
-
-            var token = GenerateJwtToken(user);
-
-            return Ok(new
-            {
-                token,
-                user.FullName,
-                user.Email
-            });
-        }
-
-        private string GenerateJwtToken(User user)
-        {
-            var key = _configuration["Jwt:Key"]
-                      ?? throw new Exception("JWT Key not configured");
-
-            var claims = new[]
-            {
-                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new Claim(ClaimTypes.Name, user.FullName),
-                new Claim(ClaimTypes.Email, user.Email),
-                new Claim(ClaimTypes.Role, user.Role)
-            };
-
-            var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
-            var creds = new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256);
-
-            var token = new JwtSecurityToken(
-                claims: claims,
-                expires: DateTime.UtcNow.AddDays(7),
-                signingCredentials: creds
-            );
-
-            return new JwtSecurityTokenHandler().WriteToken(token);
+            return Ok(new { token });
         }
     }
 }

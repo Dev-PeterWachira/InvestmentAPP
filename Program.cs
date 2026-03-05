@@ -16,6 +16,8 @@ builder.Services.AddControllers();
 // Services
 builder.Services.AddScoped<IContributionService, ContributionService>();
 
+builder.Services.AddScoped<IAuthService, AuthService>();
+
 // Database
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
