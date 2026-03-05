@@ -18,6 +18,9 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
     builder.Services.AddHostedService<MonthlyFineService>();
 
+    builder.Services.AddHttpClient<DarajaService>();
+
+
 
 // JWT Authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
