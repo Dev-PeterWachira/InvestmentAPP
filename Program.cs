@@ -5,12 +5,16 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.OpenApi.Models;
 using Investment.API.Services;
+using Investment.API.Services.Interfaces;
 
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Controllers
 builder.Services.AddControllers();
+
+// Services
+builder.Services.AddScoped<IContributionService, ContributionService>();
 
 // Database
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
