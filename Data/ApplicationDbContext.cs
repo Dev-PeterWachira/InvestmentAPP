@@ -12,6 +12,8 @@ namespace Investment.API.Data
         public DbSet<Contribution> Contributions { get; set; }
         public DbSet<Fine> Fines { get; set; }
 
+        public DbSet<Payment> Payments {get; set;}
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
