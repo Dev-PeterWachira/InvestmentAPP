@@ -24,7 +24,8 @@ builder.Services.AddHttpClient<IDarajaService, DarajaService>();
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-    builder.Services.AddHostedService<MonthlyFineService>();
+    builder.Services.AddScoped<IFineService, FineService>();
+    builder.Services.AddHostedService<MonthlyFineBackgroundService>();
 
     builder.Services.AddHttpClient<DarajaService>();
 
